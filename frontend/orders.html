@@ -1,0 +1,1030 @@
+# Updated Restaurant Orders Dashboard
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Restaurant Orders</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f4f4f4;
+            color: #222;
+        }
+
+        header {
+            background: #111;
+            color: white;
+            text-align: center;
+            padding: 25px 15px;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 30px;
+        }
+
+        header p {
+            margin: 8px 0 0;
+            color: #ccc;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: auto;
+            padding: 20px;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 18px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+        }
+
+        .stat-card h2 {
+            margin: 0;
+            font-size: 28px;
+        }
+
+        .stat-card p {
+            margin: 6px 0 0;
+            color: #777;
+        }
+
+        .refresh-btn {
+            width: 100%;
+            padding: 13px;
+            border: none;
+            border-radius: 10px;
+            background: #111;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            margin-bottom: 15px;
+        }
+
+        .refresh-btn:hover {
+            opacity: 0.8;
+        }
+
+        /* STATUS FILTERS */
+
+        .status-filters {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .filter-btn {
+            border: none;
+            padding: 10px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            background: white;
+            font-size: 14px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .filter-btn:hover {
+            opacity: 0.8;
+        }
+
+        .filter-btn.active {
+            background: #111;
+            color: white;
+        }
+
+        .order-card {
+            background: white;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-radius: 15px;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+        }
+
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .order-header h2 {
+            margin: 0;
+        }
+
+        .order-item {
+            font-size: 18px;
+            margin: 15px 0 8px;
+        }
+
+        .order-info {
+            color: #666;
+            margin: 6px 0;
+        }
+
+        .order-total {
+            font-size: 19px;
+            font-weight: bold;
+            margin-top: 12px;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 7px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        .pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .preparing {
+            background: #cfe2ff;
+            color: #084298;
+        }
+
+        .ready {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .completed {
+            background: #d1e7dd;
+            color: #0f5132;
+        }
+
+        .status-buttons {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 15px;
+        }
+
+        .status-buttons button {
+            border: none;
+            padding: 9px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            background: #eee;
+            font-size: 14px;
+        }
+
+        .status-buttons button:hover {
+            opacity: 0.8;
+        }
+
+        .status-buttons button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .empty {
+            text-align: center;
+            padding: 40px;
+            background: white;
+            border-radius: 15px;
+        }
+
+        /* NEW ORDER NOTIFICATION */
+
+        .notification {
+            display: none;
+            background: #111;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: bold;
+            cursor: pointer;
+            animation: notificationAppear 0.4s ease;
+        }
+
+        .notification:hover {
+            opacity: 0.9;
+        }
+
+        @keyframes notificationAppear {
+
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+
+        }
+
+        @media (max-width: 700px) {
+
+            .stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .order-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<header>
+
+    <h1>📋 Restaurant Orders</h1>
+
+    <p>Order Management Dashboard</p>
+
+</header>
+
+
+<div class="container">
+
+
+    <!-- NEW ORDER NOTIFICATION -->
+
+    <div
+        id="newOrderNotification"
+        class="notification"
+        onclick="hideNotification()"
+    >
+
+        🔔 New Order Received! Click to dismiss.
+
+    </div>
+
+
+    <!-- DASHBOARD STATISTICS -->
+
+    <div class="stats">
+
+        <div class="stat-card">
+
+            <h2 id="totalOrders">0</h2>
+
+            <p>Total Orders</p>
+
+        </div>
+
+
+        <div class="stat-card">
+
+            <h2 id="pendingOrders">0</h2>
+
+            <p>Pending</p>
+
+        </div>
+
+
+        <div class="stat-card">
+
+            <h2 id="completedOrders">0</h2>
+
+            <p>Completed</p>
+
+        </div>
+
+
+        <div class="stat-card">
+
+            <h2>
+                ₹<span id="totalSales">0</span>
+            </h2>
+
+            <p>Total Sales</p>
+
+        </div>
+
+    </div>
+
+
+    <!-- REFRESH -->
+
+    <button
+        class="refresh-btn"
+        onclick="loadOrders()"
+    >
+
+        🔄 Refresh Orders
+
+    </button>
+
+
+    <!-- STATUS FILTERS -->
+
+    <div class="status-filters">
+
+        <button
+            onclick="filterOrders('All')"
+            class="filter-btn active"
+        >
+            📋 All
+        </button>
+
+
+        <button
+            onclick="filterOrders('Pending')"
+            class="filter-btn"
+        >
+            🟡 Pending
+        </button>
+
+
+        <button
+            onclick="filterOrders('Preparing')"
+            class="filter-btn"
+        >
+            🔵 Preparing
+        </button>
+
+
+        <button
+            onclick="filterOrders('Ready')"
+            class="filter-btn"
+        >
+            🟢 Ready
+        </button>
+
+
+        <button
+            onclick="filterOrders('Completed')"
+            class="filter-btn"
+        >
+            ✅ Completed
+        </button>
+
+    </div>
+
+
+    <!-- ORDERS -->
+
+    <div id="orders">
+
+        <p class="empty">
+            Loading orders...
+        </p>
+
+    </div>
+
+
+</div>
+
+
+
+<script>
+
+
+    // =========================
+    // CURRENT FILTER
+    // =========================
+
+    let currentFilter = "All";
+
+
+    let allOrders = [];
+
+
+    // =========================
+    // CHANGE FILTER
+    // =========================
+
+    function filterOrders(status) {
+
+        currentFilter = status;
+
+
+        document
+            .querySelectorAll(".filter-btn")
+            .forEach(button => {
+
+                button.classList.remove(
+                    "active"
+                );
+
+            });
+
+
+        event.target.classList.add(
+            "active"
+        );
+
+
+        displayOrders();
+
+    }
+
+
+    // =========================
+    // NEW ORDER TRACKING
+    // =========================
+
+    let lastOrderCount = 0;
+
+    let firstLoad = true;
+
+
+    function checkForNewOrder(orders) {
+
+        const currentOrderCount =
+            orders.length;
+
+
+        if (firstLoad) {
+
+            lastOrderCount =
+                currentOrderCount;
+
+            firstLoad = false;
+
+            return;
+
+        }
+
+
+        if (
+            currentOrderCount >
+            lastOrderCount
+        ) {
+
+            showNewOrderNotification();
+
+        }
+
+
+        lastOrderCount =
+            currentOrderCount;
+
+    }
+
+
+    function showNewOrderNotification() {
+
+        const notification =
+            document.getElementById(
+                "newOrderNotification"
+            );
+
+
+        notification.style.display =
+            "block";
+
+
+        try {
+
+            const audioContext =
+                new (
+                    window.AudioContext ||
+                    window.webkitAudioContext
+                )();
+
+
+            const oscillator =
+                audioContext.createOscillator();
+
+
+            const gainNode =
+                audioContext.createGain();
+
+
+            oscillator.connect(
+                gainNode
+            );
+
+
+            gainNode.connect(
+                audioContext.destination
+            );
+
+
+            oscillator.frequency.value =
+                800;
+
+
+            gainNode.gain.value =
+                0.15;
+
+
+            oscillator.start();
+
+
+            oscillator.stop(
+                audioContext.currentTime + 0.2
+            );
+
+        }
+
+        catch (error) {
+
+            console.log(
+                "Notification sound unavailable."
+            );
+
+        }
+
+    }
+
+
+    function hideNotification() {
+
+        document
+            .getElementById(
+                "newOrderNotification"
+            )
+            .style.display = "none";
+
+    }
+
+
+    // =========================
+    // LOAD ORDERS
+    // =========================
+
+    function loadOrders() {
+
+        fetch(
+            "http://127.0.0.1:8000/orders"
+        )
+
+            .then(response => {
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        "Unable to load orders"
+                    );
+
+                }
+
+                return response.json();
+
+            })
+
+            .then(data => {
+
+                const orders =
+                    data.orders || [];
+
+
+                allOrders =
+                    orders;
+
+
+                checkForNewOrder(
+                    orders
+                );
+
+
+                // =========================
+                // STATISTICS
+                // =========================
+
+                document
+                    .getElementById(
+                        "totalOrders"
+                    )
+                    .textContent =
+                    orders.length;
+
+
+                let pending = 0;
+
+                let completed = 0;
+
+                let sales = 0;
+
+
+                orders.forEach(order => {
+
+                    sales += Number(
+                        order.total_price || 0
+                    );
+
+
+                    const status =
+                        order.status ||
+                        "Pending";
+
+
+                    if (
+                        status === "Pending"
+                    ) {
+
+                        pending++;
+
+                    }
+
+
+                    if (
+                        status === "Completed"
+                    ) {
+
+                        completed++;
+
+                    }
+
+                });
+
+
+                document
+                    .getElementById(
+                        "pendingOrders"
+                    )
+                    .textContent =
+                    pending;
+
+
+                document
+                    .getElementById(
+                        "completedOrders"
+                    )
+                    .textContent =
+                    completed;
+
+
+                document
+                    .getElementById(
+                        "totalSales"
+                    )
+                    .textContent =
+                    sales;
+
+
+                displayOrders();
+
+            })
+
+            .catch(error => {
+
+                console.error(error);
+
+
+                document
+                    .getElementById(
+                        "orders"
+                    )
+                    .innerHTML =
+
+                    `<p class="empty">
+
+                        ❌ Unable to load orders.
+
+                        <br><br>
+
+                        Make sure the FastAPI server is running.
+
+                    </p>`;
+
+            });
+
+    }
+
+
+    // =========================
+    // DISPLAY ORDERS
+    // =========================
+
+    function displayOrders() {
+
+        const ordersDiv =
+            document.getElementById(
+                "orders"
+            );
+
+
+        ordersDiv.innerHTML = "";
+
+
+        let filteredOrders =
+            allOrders;
+
+
+        if (
+            currentFilter !== "All"
+        ) {
+
+            filteredOrders =
+                allOrders.filter(
+                    order =>
+                        (
+                            order.status ||
+                            "Pending"
+                        ) === currentFilter
+                );
+
+        }
+
+
+        // =========================
+        // NO ORDERS
+        // =========================
+
+        if (
+            filteredOrders.length === 0
+        ) {
+
+            ordersDiv.innerHTML =
+
+                `<p class="empty">
+
+                    No ${currentFilter === "All"
+                        ? ""
+                        : currentFilter.toLowerCase() + " "
+                    }orders found.
+
+                </p>`;
+
+            return;
+
+        }
+
+
+        // =========================
+        // DISPLAY ORDERS
+        // =========================
+
+        filteredOrders.forEach(order => {
+
+            const orderCard =
+                document.createElement(
+                    "div"
+                );
+
+
+            orderCard.className =
+                "order-card";
+
+
+            const status =
+                order.status ||
+                "Pending";
+
+
+            const statusClass =
+                status.toLowerCase();
+
+
+            orderCard.innerHTML = `
+
+                <div class="order-header">
+
+                    <h2>
+                        Order #${order.id}
+                    </h2>
+
+                    <span
+                        class="status ${statusClass}"
+                    >
+                        ${status}
+                    </span>
+
+                </div>
+
+
+                <div class="order-item">
+
+                    🍽️
+
+                    <strong>
+                        ${order.item_name}
+                    </strong>
+
+                </div>
+
+
+                <div class="order-info">
+
+                    Quantity:
+                    ${order.quantity}
+
+                </div>
+
+
+                <div class="order-total">
+
+                    Total:
+                    ₹${order.total_price}
+
+                </div>
+
+
+                <div class="status-buttons">
+
+
+                    <button
+                        onclick="changeStatus(
+                            ${order.id},
+                            'Pending'
+                        )"
+                        ${status === "Pending"
+                            ? "disabled"
+                            : ""}
+                    >
+
+                        🟡 Pending
+
+                    </button>
+
+
+                    <button
+                        onclick="changeStatus(
+                            ${order.id},
+                            'Preparing'
+                        )"
+                        ${status === "Preparing"
+                            ? "disabled"
+                            : ""}
+                    >
+
+                        🔵 Preparing
+
+                    </button>
+
+
+                    <button
+                        onclick="changeStatus(
+                            ${order.id},
+                            'Ready'
+                        )"
+                        ${status === "Ready"
+                            ? "disabled"
+                            : ""}
+                    >
+
+                        🟢 Ready
+
+                    </button>
+
+
+                    <button
+                        onclick="changeStatus(
+                            ${order.id},
+                            'Completed'
+                        )"
+                        ${status === "Completed"
+                            ? "disabled"
+                            : ""}
+                    >
+
+                        ✅ Completed
+
+                    </button>
+
+
+                </div>
+
+            `;
+
+
+            ordersDiv.appendChild(
+                orderCard
+            );
+
+        });
+
+    }
+
+
+    // =========================
+    // CHANGE ORDER STATUS
+    // =========================
+
+    async function changeStatus(
+        orderId,
+        newStatus
+    ) {
+
+        try {
+
+            const response =
+                await fetch(
+                    `http://127.0.0.1:8000/orders/${orderId}/status`,
+                    {
+
+                        method: "PUT",
+
+                        headers: {
+
+                            "Content-Type":
+                                "application/json"
+
+                        },
+
+                        body: JSON.stringify({
+
+                            status: newStatus
+
+                        })
+
+                    }
+                );
+
+
+            const data =
+                await response.json();
+
+
+            if (!response.ok) {
+
+                throw new Error(
+                    "Failed to update status"
+                );
+
+            }
+
+
+            if (
+                data.message ===
+                "Invalid status"
+            ) {
+
+                alert(
+                    "Invalid order status."
+                );
+
+                return;
+
+            }
+
+
+            console.log(
+                "Status updated:",
+                data
+            );
+
+
+            loadOrders();
+
+        }
+
+        catch (error) {
+
+            console.error(error);
+
+            alert(
+                "❌ Unable to update order status."
+            );
+
+        }
+
+    }
+
+
+    // =========================
+    // LOAD ORDERS ON PAGE OPEN
+    // =========================
+
+    loadOrders();
+
+
+    // =========================
+    // AUTO REFRESH
+    // =========================
+
+    setInterval(
+        loadOrders,
+        3000
+    );
+
+
+</script>
+
+
+</body>
+
+</html>
+```

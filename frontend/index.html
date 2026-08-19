@@ -1,0 +1,1194 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Lassi Day Cafe</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f4f4f4;
+            color: #222;
+        }
+
+        header {
+            background: #111;
+            color: white;
+            text-align: center;
+            padding: 30px 15px;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 32px;
+        }
+
+        header p {
+            margin: 8px 0 0;
+            color: #ccc;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: auto;
+            padding: 20px;
+        }
+
+        .search {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .categories {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            margin-bottom: 20px;
+        }
+
+        .category-btn {
+            border: none;
+            padding: 10px 18px;
+            border-radius: 20px;
+            cursor: pointer;
+            background: white;
+            white-space: nowrap;
+        }
+
+        .category-btn.active {
+            background: #111;
+            color: white;
+        }
+
+        #menu {
+            display: grid;
+            gap: 15px;
+        }
+
+        .food-card {
+            background: white;
+            padding: 18px;
+            border-radius: 15px;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+            animation: appear 0.4s ease;
+        }
+
+        .food-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            display: block;
+        }
+
+        .food-card h2 {
+            margin: 0 0 6px;
+        }
+
+        .category {
+            color: #777;
+            font-size: 14px;
+        }
+
+        .price {
+            font-size: 20px;
+            font-weight: bold;
+            margin: 12px 0;
+        }
+
+        .add-btn {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            background: #111;
+            color: white;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .add-btn:hover {
+            opacity: 0.8;
+        }
+
+        .empty {
+            text-align: center;
+            padding: 30px;
+        }
+
+        @keyframes appear {
+
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+
+        }
+
+        .cart-item {
+            padding: 12px;
+            margin: 8px 0;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+        }
+
+        .cart-box {
+            background: white;
+            padding: 20px;
+            margin-top: 25px;
+            border-radius: 15px;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+        }
+
+        .cart-item strong {
+            font-size: 17px;
+        }
+
+        .cart-item button {
+            border: none;
+            background: #111;
+            color: white;
+            border-radius: 6px;
+            padding: 5px 8px;
+            margin-left: 4px;
+            cursor: pointer;
+        }
+
+        .cart-item button:hover {
+            opacity: 0.8;
+        }
+
+        .cart-actions {
+            margin-top: 15px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .clear-btn,
+        .order-btn {
+            border: none;
+            padding: 12px 18px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .clear-btn {
+            background: #ddd;
+            color: #222;
+        }
+
+        .order-btn {
+            background: #111;
+            color: white;
+        }
+
+        .order-btn:hover,
+        .clear-btn:hover {
+            opacity: 0.8;
+        }
+
+        .order-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* ORDER TRACKING */
+
+        .order-status-box {
+            background: #111;
+            color: white;
+            padding: 20px;
+            margin-top: 20px;
+            border-radius: 15px;
+            display: none;
+        }
+
+        .order-status-box h2 {
+            margin-top: 0;
+        }
+
+        .order-number {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .status-text {
+            font-size: 18px;
+            margin-top: 10px;
+        }
+
+    </style>
+</head>
+
+<body>
+<header>
+
+    <h1 id="restaurant">Lassi Day Cafe</h1>
+
+    <p>BURGER PAV</p>
+
+</header>
+<div class="container">
+
+    <input
+        type="text"
+        id="search"
+        class="search"
+        placeholder="🔍 Search food..."
+    >
+
+    <div id="categories" class="categories"></div>
+
+    <div id="menu"></div>
+
+
+    <!-- CART -->
+
+    <div id="cart" class="cart-box">
+
+        <h2>🛒 Your Order</h2>
+
+        <div id="cartItems">
+
+            <p>Your cart is empty.</p>
+
+        </div>
+
+        <h3>
+            Total: ₹<span id="cartTotal">0</span>
+        </h3>
+
+
+        <!-- ORDER TRACKING -->
+
+        <div
+            id="orderStatusBox"
+            class="order-status-box"
+        >
+
+            <h2>📦 Order Tracking</h2>
+
+            <div class="order-number">
+
+                Order #<span id="currentOrderNumber">
+                    -
+                </span>
+
+            </div>
+
+            <div class="status-text">
+
+                Status:
+                <span id="currentOrderStatus">
+                    🟡 Pending
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <div class="cart-actions">
+
+            <button
+                class="clear-btn"
+                onclick="clearCart()"
+            >
+                🗑️ Clear Cart
+            </button>
+
+            <button
+                id="placeOrderBtn"
+                class="order-btn"
+                onclick="placeOrder()"
+            >
+                ✅ Place Order
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+    // =========================
+    // MENU
+    // =========================
+
+    let allItems = [];
+
+    let selectedCategory = "All";
+
+    /*
+        NEW:
+        Remember the latest order even
+        after refreshing the webpage.
+    */
+    let currentOrderId =
+        localStorage.getItem("currentOrderId");
+
+
+    // =========================
+    // RESTORE LAST ORDER
+    // =========================
+
+    function restoreLastOrder() {
+
+        if (!currentOrderId) {
+
+            return;
+
+        }
+
+        document
+            .getElementById("orderStatusBox")
+            .style.display = "block";
+
+
+        document
+            .getElementById("currentOrderNumber")
+            .textContent = currentOrderId;
+
+
+        updateOrderStatus("Pending");
+
+
+        checkOrderStatus();
+
+    }
+
+
+    // =========================
+    // LOAD MENU
+    // =========================
+
+    fetch("http://192.168.0.104:8000/menu")
+
+        .then(response => response.json())
+
+        .then(data => {
+
+            document
+                .getElementById("restaurant")
+                .textContent =
+                data.restaurant;
+
+            allItems = data.items;
+
+            createCategories();
+
+            displayMenu();
+
+            /*
+                Restore previous order tracking
+                after menu has loaded.
+            */
+            restoreLastOrder();
+
+        })
+
+        .catch(error => {
+
+            console.error(error);
+
+            document
+                .getElementById("restaurant")
+                .textContent =
+                "Unable to load menu";
+
+        });
+
+
+    // =========================
+    // CATEGORIES
+    // =========================
+
+    function createCategories() {
+
+        const categoriesDiv =
+            document.getElementById(
+                "categories"
+            );
+
+        categoriesDiv.innerHTML = "";
+
+
+        const categories = [
+
+            "All",
+
+            ...new Set(
+                allItems.map(
+                    item => item.category
+                )
+            )
+
+        ];
+
+
+        categories.forEach(category => {
+
+            const button =
+                document.createElement(
+                    "button"
+                );
+
+
+            button.textContent =
+                category;
+
+            button.className =
+                "category-btn";
+
+
+            if (category === "All") {
+
+                button.classList.add(
+                    "active"
+                );
+
+            }
+
+
+            button.onclick = () => {
+
+                selectedCategory =
+                    category;
+
+
+                document
+                    .querySelectorAll(
+                        ".category-btn"
+                    )
+                    .forEach(btn =>
+                        btn.classList.remove(
+                            "active"
+                        )
+                    );
+
+
+                button.classList.add(
+                    "active"
+                );
+
+
+                displayMenu();
+
+            };
+
+
+            categoriesDiv.appendChild(
+                button
+            );
+
+        });
+
+    }
+
+
+    // =========================
+    // DISPLAY MENU
+    // =========================
+
+    function displayMenu() {
+
+        const menu =
+            document.getElementById(
+                "menu"
+            );
+
+
+        const search =
+            document
+                .getElementById("search")
+                .value
+                .toLowerCase();
+
+
+        menu.innerHTML = "";
+
+
+        const filteredItems =
+            allItems.filter(item => {
+
+                const matchesCategory =
+                    selectedCategory === "All" ||
+                    item.category ===
+                    selectedCategory;
+
+
+                const matchesSearch =
+                    item.name
+                        .toLowerCase()
+                        .includes(search);
+
+
+                return (
+                    matchesCategory &&
+                    matchesSearch
+                );
+
+            });
+
+
+        if (filteredItems.length === 0) {
+
+            menu.innerHTML =
+
+                `<div class="empty">
+
+                    <h2>
+                        No food found 😕
+                    </h2>
+
+                    <p>
+                        Try another search.
+                    </p>
+
+                </div>`;
+
+            return;
+
+        }
+
+
+        filteredItems.forEach(item => {
+
+            const card =
+                document.createElement(
+                    "div"
+                );
+
+
+            card.className =
+                "food-card";
+
+
+            const imageUrl =
+                item.image ||
+                "https://placehold.co/800x500?text=Food";
+
+
+            card.innerHTML = `
+
+                <img
+                    src="${imageUrl}"
+                    alt="${item.name}"
+                    class="food-image"
+                    onerror="this.src='https://placehold.co/800x500?text=Food'"
+                >
+
+                <h2>
+                    ${item.name}
+                </h2>
+
+                <div class="category">
+                    ${item.category}
+                </div>
+
+                <div class="price">
+                    ₹${item.price}
+                </div>
+
+                <button
+                    class="add-btn"
+                    onclick="addToCart('${item.name}')"
+                >
+                    Add to Order
+                </button>
+
+            `;
+
+
+            menu.appendChild(card);
+
+        });
+
+    }
+
+
+    document
+        .getElementById("search")
+        .addEventListener(
+            "input",
+            displayMenu
+        );
+
+
+    // =========================
+    // CART
+    // =========================
+
+    let cart = [];
+
+
+    function addToCart(foodName) {
+
+        const item =
+            allItems.find(
+                item =>
+                    item.name === foodName
+            );
+
+
+        if (!item) return;
+
+
+        const existingItem =
+            cart.find(
+                cartItem =>
+                    cartItem.name ===
+                    foodName
+            );
+
+
+        if (existingItem) {
+
+            existingItem.quantity++;
+
+        }
+
+        else {
+
+            cart.push({
+
+                ...item,
+
+                quantity: 1
+
+            });
+
+        }
+
+
+        updateCart();
+
+    }
+
+
+    // =========================
+    // UPDATE CART
+    // =========================
+
+    function updateCart() {
+
+        const cartItems =
+            document.getElementById(
+                "cartItems"
+            );
+
+
+        const cartTotal =
+            document.getElementById(
+                "cartTotal"
+            );
+
+
+        cartItems.innerHTML = "";
+
+
+        let total = 0;
+
+
+        cart.forEach((item, index) => {
+
+            const itemTotal =
+                item.price *
+                item.quantity;
+
+
+            total += itemTotal;
+
+
+            const itemDiv =
+                document.createElement(
+                    "div"
+                );
+
+
+            itemDiv.innerHTML = `
+
+                <div class="cart-item">
+
+                    <strong>
+                        ${item.name}
+                    </strong>
+
+                    <br>
+
+                    ₹${item.price}
+                    ×
+                    ${item.quantity}
+
+
+                    <button
+                        onclick="decreaseQuantity(${index})"
+                    >
+                        ➖
+                    </button>
+
+
+                    <button
+                        onclick="increaseQuantity(${index})"
+                    >
+                        ➕
+                    </button>
+
+
+                    <button
+                        onclick="removeFromCart(${index})"
+                    >
+                        🗑️
+                    </button>
+
+
+                    <strong>
+                        = ₹${itemTotal}
+                    </strong>
+
+                </div>
+
+            `;
+
+
+            cartItems.appendChild(
+                itemDiv
+            );
+
+        });
+
+
+        if (cart.length === 0) {
+
+            cartItems.innerHTML =
+                "<p>Your cart is empty.</p>";
+
+        }
+
+
+        cartTotal.textContent =
+            total;
+
+    }
+
+
+    // =========================
+    // QUANTITY
+    // =========================
+
+    function increaseQuantity(index) {
+
+        cart[index].quantity++;
+
+        updateCart();
+
+    }
+
+
+    function decreaseQuantity(index) {
+
+        if (
+            cart[index].quantity > 1
+        ) {
+
+            cart[index].quantity--;
+
+        }
+
+        else {
+
+            cart.splice(index, 1);
+
+        }
+
+
+        updateCart();
+
+    }
+
+
+    function removeFromCart(index) {
+
+        cart.splice(index, 1);
+
+        updateCart();
+
+    }
+
+
+    // =========================
+    // CLEAR CART
+    // =========================
+
+    function clearCart() {
+
+        cart = [];
+
+        updateCart();
+
+    }
+
+
+    // =========================
+    // UPDATE ORDER STATUS
+    // =========================
+
+    function updateOrderStatus(status) {
+
+        const statusElement =
+            document.getElementById(
+                "currentOrderStatus"
+            );
+
+
+        if (!statusElement) {
+
+            return;
+
+        }
+
+
+        if (status === "Pending") {
+
+            statusElement.textContent =
+                "🟡 Pending";
+
+        }
+
+        else if (
+            status === "Preparing"
+        ) {
+
+            statusElement.textContent =
+                "🔵 Preparing";
+
+        }
+
+        else if (
+            status === "Ready"
+        ) {
+
+            statusElement.textContent =
+                "🟢 Ready";
+
+        }
+
+        else if (
+            status === "Completed"
+        ) {
+
+            statusElement.textContent =
+                "✅ Completed";
+
+        }
+
+        else {
+
+            statusElement.textContent =
+                status;
+
+        }
+
+    }
+
+
+    // =========================
+    // CHECK ORDER STATUS
+    // =========================
+
+    async function checkOrderStatus() {
+
+        if (!currentOrderId) {
+
+            return;
+
+        }
+
+
+        try {
+
+            const response =
+                await fetch(
+                    "http://192.168.0.104:8000/orders"
+                );
+
+
+            if (!response.ok) {
+
+                console.error(
+                    "Could not load orders."
+                );
+
+                return;
+
+            }
+
+
+            const data =
+                await response.json();
+
+
+            const orders =
+                data.orders || [];
+
+
+            const currentOrder =
+                orders.find(
+                    order =>
+                        Number(order.id) ===
+                        Number(currentOrderId)
+                );
+
+
+            if (currentOrder) {
+
+                console.log(
+                    "Current order status:",
+                    currentOrder.status
+                );
+
+
+                updateOrderStatus(
+                    currentOrder.status ||
+                    "Pending"
+                );
+
+            }
+
+        }
+
+        catch (error) {
+
+            console.error(
+                "Could not check order status:",
+                error
+            );
+
+        }
+
+    }
+
+
+    // =========================
+    // CHECK STATUS EVERY 3 SECONDS
+    // =========================
+
+    setInterval(
+        checkOrderStatus,
+        3000
+    );
+
+
+    // =========================
+    // PLACE ORDER
+    // =========================
+
+    async function placeOrder() {
+
+        if (cart.length === 0) {
+
+            alert(
+                "Your cart is empty! 😕"
+            );
+
+            return;
+
+        }
+
+
+        const placeOrderBtn =
+            document.getElementById(
+                "placeOrderBtn"
+            );
+
+
+        placeOrderBtn.disabled =
+            true;
+
+
+        placeOrderBtn.textContent =
+            "⏳ Placing Order...";
+
+
+        try {
+
+            /*
+                Each cart item becomes
+                a separate order.
+            */
+
+            for (const item of cart) {
+
+                const totalPrice =
+                    item.price *
+                    item.quantity;
+
+
+                const response =
+                    await fetch(
+                        "http://192.168.0.104:8000/orders",
+                        {
+
+                            method: "POST",
+
+                            headers: {
+
+                                "Content-Type":
+                                    "application/json"
+
+                            },
+
+                            body: JSON.stringify({
+
+                                item_name:
+                                    item.name,
+
+                                quantity:
+                                    item.quantity,
+
+                                total_price:
+                                    totalPrice
+
+                            })
+
+                        }
+                    );
+
+
+                const data =
+                    await response.json();
+
+
+                if (!response.ok) {
+
+                    throw new Error(
+
+                        data.message ||
+                        "Order could not be placed."
+
+                    );
+
+                }
+
+
+                currentOrderId =
+                    data.order.id;
+
+
+                /*
+                    NEW:
+                    Save latest order ID
+                    in browser storage.
+                */
+                localStorage.setItem(
+                    "currentOrderId",
+                    currentOrderId
+                );
+
+
+                console.log(
+                    "Order created:",
+                    data.order
+                );
+
+            }
+
+
+            // =========================
+            // SHOW ORDER TRACKING
+            // =========================
+
+            document
+                .getElementById(
+                    "orderStatusBox"
+                )
+                .style.display =
+                "block";
+
+
+            document
+                .getElementById(
+                    "currentOrderNumber"
+                )
+                .textContent =
+                currentOrderId;
+
+
+            updateOrderStatus(
+                "Pending"
+            );
+
+
+            await checkOrderStatus();
+
+
+            alert(
+                "🎉 Order placed successfully!"
+            );
+
+
+            clearCart();
+
+        }
+
+
+
+        catch (error) {
+
+            console.error(
+                error
+            );
+
+
+            alert(
+                "❌ Something went wrong while placing your order."
+            );
+
+        }
+
+
+        finally {
+
+            placeOrderBtn.disabled =
+                false;
+
+
+            placeOrderBtn.textContent =
+                "✅ Place Order";
+
+        }
+
+    }
+
+</script>
+
+
+</body>
+
+</html>

@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Restaurant Menu</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background: #f5f5f5;
+        }
+
+        header {
+            background: #111;
+            color: white;
+            text-align: center;
+            padding: 30px;
+        }
+
+        .menu {
+            max-width: 700px;
+            margin: 30px auto;
+            padding: 20px;
+        }
+
+        .item {
+            background: white;
+            margin: 15px 0;
+            padding: 20px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: space-between;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+
+        .price {
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h1>🍽️ My Restaurant</h1>
+    <p>Digital QR Menu</p>
+</header>
+
+<div class="menu" id="menu">
+    <p>Loading menu...</p>
+</div>
+
+<script>
+    fetch("http://127.0.0.1:8000/menu")
+        .then(response => response.json())
+        .then(data => {
+
+            const menu = document.getElementById("menu");
+
+            menu.innerHTML = "";
+
+            data.items.forEach(item => {
+
+                menu.innerHTML += `
+                    <div class="item">
+                        <span>🍽️ ${item.name}</span>
+                        <span class="price">₹${item.price}</span>
+                    </div>
+                `;
+
+            });
+
+        })
+        .catch(error => {
+            document.getElementById("menu").innerHTML =
+                "<p>❌ Could not connect to the menu server.</p>";
+        });
+</script>
+
+</body>
+</html>
